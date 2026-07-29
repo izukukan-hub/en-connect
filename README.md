@@ -20,14 +20,14 @@ cp .env.example .env
 
 | 変数 | 説明 |
 | --- | --- |
-| `DATABASE_URL` | SQLiteのファイルパス。ローカルは `file:./dev.db` のままでOK |
+| `DATABASE_URL` | Postgresの接続文字列（[Neon](https://neon.tech/)想定。VercelにNeon連携を追加すると自動発行される） |
 | `ADMIN_PASSWORD` | 管理画面（`/admin`）のログインパスワード |
 | `ADMIN_SESSION_SECRET` | セッション署名用のランダムな文字列（`openssl rand -hex 32` などで生成） |
 | `NOTION_TOKEN` | Notion Integrationのトークン（[notion.so/my-integrations](https://www.notion.so/my-integrations)で発行） |
 | `NOTION_STORES_DATABASE_ID` | 店舗一覧を管理するNotionデータベースのID |
 | `NOTION_STORES_ACTIVE_PROPERTY` | 店舗を公開状態にするチェックボックスのプロパティ名（省略時 `Active`） |
 
-DBを初期化する。
+DBを初期化する（有効なPostgres接続文字列が`DATABASE_URL`に必要）。
 
 ```bash
 npx prisma migrate dev
@@ -64,7 +64,10 @@ HP制作で使っているNotionワークスペースに、以下のプロパテ
 
 ## デプロイ
 
-Vercelを想定。デプロイ先で以下を行う。
+Vercelを想定。DBはVercel Marketplace経由の[Neon](https://vercel.com/marketplace/neon)（Postgres）を使う。
 
-- 上記の環境変数をVercelのプロジェクト設定に登録する
-- SQLite（ファイルDB）はVercelのようなサーバーレス環境では永続化されないため、本番では [Turso](https://turso.tech/) や [Vercel Postgres](https://vercel.com/storage/postgres) など永続的なDBへの切り替えを推奨（`prisma/schema.prisma` の `datasource` と `lib/prisma.ts` のアダプターを差し替える）
+1. VercelプロジェクトにGitHubリポジトリをImport
+2. Environment Variablesに `ADMIN_PASSWORD` `ADMIN_SESSION_SECRET` を設定（Notion関連は後回しでも可、未設定だと店舗一覧の取得だけエラー表示になる）
+3. デプロイ後、プロジェクトの「Storage」タブから「Neon」を追加（無料プランでOK）→ `DATABASE_URL` が自動で環境変数に追加される
+4. ローカルから `vercel env pull` などでその接続文字列を取得し、`npx prisma migrate deploy` を実行してテーブルを作成する
+5. 再デプロイして完了

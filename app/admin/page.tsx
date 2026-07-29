@@ -4,6 +4,8 @@ import { GuestForm } from "./guest-form";
 import { CopyLinkButton } from "./copy-link-button";
 import { logout } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 function formatDate(date: Date | null): string {
   if (!date) return "-";
   return date.toLocaleDateString("ja-JP");
