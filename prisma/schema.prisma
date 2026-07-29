@@ -1,0 +1,34 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Guest {
+  id          String       @id @default(cuid())
+  token       String       @unique @default(cuid())
+  name        String?
+  checkIn     DateTime?
+  checkOut    DateTime?
+  createdAt   DateTime     @default(now())
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id        String   @id @default(cuid())
+  guestId   String
+  guest     Guest    @relation(fields: [guestId], references: [id])
+  storeId   String
+  storeName String
+  usedAt    DateTime @default(now())
+
+  @@unique([guestId, storeId])
+}
