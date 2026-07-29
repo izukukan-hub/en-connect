@@ -35,15 +35,23 @@ function firstImageUrl(prop: PageObjectResponse["properties"][string] | undefine
   return null;
 }
 
+function pageCoverUrl(page: PageObjectResponse): string | null {
+  const cover = page.cover;
+  if (!cover) return null;
+  if (cover.type === "external") return cover.external.url;
+  if (cover.type === "file") return cover.file.url;
+  return null;
+}
+
 function toStore(page: PageObjectResponse): Store {
   const props = page.properties;
   return {
     id: page.id,
     name: plainText(props["Name"] ?? props["名前"]),
-    description: plainText(props["Description"] ?? props["説明"]),
+    description: plainText(props["Description"] ?? props["説明"] ?? props["概要"]),
     address: plainText(props["Address"] ?? props["住所"]),
     couponText: plainText(props["Coupon"] ?? props["クーポン内容"]),
-    imageUrl: firstImageUrl(props["Image"] ?? props["画像"]),
+    imageUrl: firstImageUrl(props["Image"] ?? props["画像"]) ?? pageCoverUrl(page),
   };
 }
 
@@ -67,7 +75,7 @@ async function fetchActiveStores(): Promise<Store[]> {
   if (!databaseId) throw new Error("NOTION_STORES_DATABASE_ID is not set");
 
   const notion = getClient();
-  const filterProperty = process.env.NOTION_STORES_ACTIVE_PROPERTY ?? "Active";
+  const filterProperty = process.env.NOTION_STORES_ACTIVE_PROPERTY ?? "クーポン対象";
   const dataSourceId = await getStoresDataSourceId(notion, databaseId);
 
   const query: QueryDataSourceParameters = {
