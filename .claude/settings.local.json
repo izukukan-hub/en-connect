@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openssl rand *)",
+      "WebSearch",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "WebFetch(domain:script.google.com)",
+      "Bash(echo \"=== Searching home directory for ennokama-related folders/repos ===\" *)"
+    ]
+  }
+}
